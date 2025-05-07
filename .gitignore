@@ -1,0 +1,46 @@
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+.expo-shared/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native (ignorujemy, bo nie używasz jeszcze Detoxa tutaj)
+android/
+ios/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# Metro
+.metro-health-check*
+
+# Logs and debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+expo-debug.log
+
+# macOS
+.DS_Store
+*.pem
+
+# Environment files
+.env
+.env*.local
+
+# TypeScript
+*.tsbuildinfo
+
+# VS Code / IntelliJ / IDEs
+.vscode/
+.idea/
+*.iml
