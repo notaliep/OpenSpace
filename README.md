@@ -7,8 +7,7 @@ Aplikacja mobilna stworzona w ramach pracy licencjackiej, służąca do rezerwac
 - React Native (Expo SDK 52)
 - Firebase (Firestore, Authentication, Storage)
 - Maestro (testy E2E)
-- Detox (dla testów mobilnych)
-- Playwright (dla testów webowych)
+
 
 ## ✨ Funkcje
 
@@ -18,7 +17,7 @@ Aplikacja mobilna stworzona w ramach pracy licencjackiej, służąca do rezerwac
 - Czat pomiędzy użytkownikami
 - Obsługa godzin i dat rezerwacji
 - System statusów miejsc: wolne / zarezerwowane
-- Testy end-to-end z wykorzystaniem Maestro i Detox
+- Testy end-to-end z wykorzystaniem Maestro
 
 ## 🔧 Uruchomienie
 
