@@ -18,15 +18,13 @@ import {
 } from "firebase/auth";
 import * as ImagePicker from "expo-image-picker";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { Ionicons } from "@expo/vector-icons";
 
-// Funkcja do przesyłania obrazu do Firebase Storage
 const uploadImage = async (uri) => {
   const storage = getStorage();
   const imageRef = ref(storage, "profile_pictures/" + new Date().getTime());
-
   const response = await fetch(uri);
   const blob = await response.blob();
-
   const snapshot = await uploadBytes(imageRef, blob);
   const downloadURL = await getDownloadURL(snapshot.ref);
   return downloadURL;
@@ -42,6 +40,7 @@ const UserProfile = () => {
     user?.photoURL || "https://www.w3schools.com/howto/img_avatar.png"
   );
   const [newPassword, setNewPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -118,8 +117,7 @@ const UserProfile = () => {
       }
       await updatePassword(user, newPassword);
       Alert.alert("Sukces", "Hasło zostało zmienione!");
-      await auth.signOut();
-      navigation.navigate("Login");
+      await signOut(auth);
     } catch (error) {
       Alert.alert("Błąd", error.message);
     }
@@ -129,7 +127,6 @@ const UserProfile = () => {
     try {
       await signOut(auth);
       Alert.alert("Sukces", "Zostałeś wylogowany!");
-      navigation.navigate("Login");
     } catch (error) {
       Alert.alert("Błąd", error.message);
     }
@@ -137,7 +134,7 @@ const UserProfile = () => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={pickImage}>
+      <TouchableOpacity testID="changeProfileImage" onPress={pickImage}>
         <Image source={{ uri: photoURL }} style={styles.profileImage} />
       </TouchableOpacity>
 
@@ -157,14 +154,32 @@ const UserProfile = () => {
       <View style={styles.spacer} />
 
       <Text style={styles.label}>Nowe hasło</Text>
-      <TextInput
-        style={styles.input}
-        value={newPassword}
-        onChangeText={setNewPassword}
-        placeholder="Podaj nowe hasło"
-        secureTextEntry
-      />
-      <TouchableOpacity style={styles.button} onPress={handleUpdatePassword}>
+      <View style={{ width: "85%", position: "relative" }}>
+        <TextInput
+          testID="passwordInput"
+          style={styles.input}
+          value={newPassword}
+          onChangeText={setNewPassword}
+          placeholder="Podaj nowe hasło"
+          secureTextEntry={!showPassword}
+        />
+        <TouchableOpacity
+          style={{ position: "absolute", right: 10, top: 10 }}
+          onPress={() => setShowPassword(!showPassword)}
+        >
+          <Ionicons
+            name={showPassword ? "eye-off" : "eye"}
+            size={24}
+            color="gray"
+          />
+        </TouchableOpacity>
+      </View>
+
+      <TouchableOpacity
+        testID="updatePassword"
+        style={styles.button}
+        onPress={handleUpdatePassword}
+      >
         <Text style={styles.buttonText}>Zmień hasło</Text>
       </TouchableOpacity>
 
@@ -185,8 +200,6 @@ const UserProfile = () => {
     </View>
   );
 };
-
-export default UserProfile;
 
 const styles = StyleSheet.create({
   container: {
@@ -211,7 +224,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   input: {
-    width: "85%",
+    width: "100%",
     height: 45,
     borderWidth: 1,
     borderColor: "#ddd",
@@ -219,6 +232,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     fontSize: 16,
     backgroundColor: "#fff",
+    paddingRight: 40,
+    marginBottom: 10,
   },
   spacer: {
     height: 20,
@@ -255,3 +270,5 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
 });
+
+export default UserProfile;

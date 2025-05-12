@@ -50,10 +50,11 @@ const ReservationDetails = ({ route }) => {
           onPress: async () => {
             try {
               await deleteDoc(doc(db, "reservations", reservationId));
+              console.log("✅ Rezerwacja usunięta:", reservationId);
               Alert.alert("Anulowano", "Rezerwacja została usunięta.");
               navigation.goBack();
             } catch (error) {
-              console.error("❌ Błąd przy anulowaniu:", error);
+              console.error("❌ Błąd przy anulowaniu rezerwacji:", error);
               Alert.alert("Błąd", "Nie udało się anulować rezerwacji.");
             }
           },

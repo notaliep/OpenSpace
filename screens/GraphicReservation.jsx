@@ -12,7 +12,6 @@ import {
   Alert,
   FlatList,
   ActivityIndicator,
-  Button,
 } from "react-native";
 import {
   collection,
@@ -25,7 +24,6 @@ import {
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import QRCode from "react-native-qrcode-svg";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { MaterialIcons } from "@expo/vector-icons";
 import { app } from "../config/firebase";
 
 const db = getFirestore(app);
@@ -74,7 +72,7 @@ const GraphicReservation = () => {
         .map((doc) => doc.data())
         .filter((r) => {
           const isSameDate = r.date === day;
-          if (!isSameDate) return false;
+          if (!isSameDate || !r.startTime || !r.endTime) return false;
           const rStart = new Date(r.startTime);
           const rEnd = new Date(r.endTime);
           return rStart < endTime && rEnd > startTime;
@@ -148,16 +146,35 @@ const GraphicReservation = () => {
         return;
       }
       setSelectedDate(date);
-      const year = date.getFullYear();
-      const month = (date.getMonth() + 1).toString().padStart(2, "0");
-      const day = date.getDate().toString().padStart(2, "0");
-      setSelectedDateStr(`${year}-${month}-${day}`);
+      setSelectedDateStr(date.toISOString().split("T")[0]);
     }
   };
 
-  const refreshSeats = () => {
-    fetchSeats(selectedDateStr);
+  const handleStartTimeChange = (event, selectedTime) => {
+    setShowStartPicker(false);
+    if (selectedTime && selectedTime < endTime) {
+      setStartTime(selectedTime);
+    } else {
+      Alert.alert(
+        "Błąd",
+        "Godzina rozpoczęcia musi być wcześniejsza niż zakończenia."
+      );
+    }
   };
+
+  const handleEndTimeChange = (event, selectedTime) => {
+    setShowEndPicker(false);
+    if (selectedTime && selectedTime > startTime) {
+      setEndTime(selectedTime);
+    } else {
+      Alert.alert(
+        "Błąd",
+        "Godzina zakończenia musi być późniejsza niż rozpoczęcia."
+      );
+    }
+  };
+
+  const refreshSeats = () => fetchSeats(selectedDateStr);
 
   if (loading) {
     return (
@@ -188,58 +205,69 @@ const GraphicReservation = () => {
       <TouchableOpacity onPress={() => setShowStartPicker(true)}>
         <Text style={styles.labelText}>
           Godzina rozpoczęcia:{" "}
-          {startTime.toLocaleTimeString("pl-PL", {
+          {startTime.toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
           })}
         </Text>
       </TouchableOpacity>
 
+      {showStartPicker && (
+        <DateTimePicker
+          value={startTime}
+          mode="time"
+          display="default"
+          onChange={handleStartTimeChange}
+        />
+      )}
+
       <TouchableOpacity onPress={() => setShowEndPicker(true)}>
         <Text style={styles.labelText}>
           Godzina zakończenia:{" "}
-          {endTime.toLocaleTimeString("pl-PL", {
+          {endTime.toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
           })}
         </Text>
       </TouchableOpacity>
+
+      {showEndPicker && (
+        <DateTimePicker
+          value={endTime}
+          mode="time"
+          display="default"
+          onChange={handleEndTimeChange}
+        />
+      )}
 
       <TouchableOpacity style={styles.refreshButton} onPress={refreshSeats}>
         <Text style={styles.refreshButtonText}>Odśwież listę miejsc</Text>
       </TouchableOpacity>
 
-      {seats.length === 0 ? (
-        <View style={styles.noSeatsContainer}>
-          <MaterialIcons name="error-outline" size={50} color="#F44336" />
-          <Text style={styles.noSeatsText}>Brak dostępnych miejsc</Text>
-          <Button title="Odśwież" onPress={refreshSeats} />
-        </View>
-      ) : (
-        <FlatList
-          data={seats}
-          keyExtractor={(item) => item.id}
-          numColumns={2}
-          contentContainerStyle={styles.seatsContainer}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[styles.seat, item.isReserved && styles.reserved]}
-              onPress={() => handleReserve(item)}
+      <FlatList
+        data={seats}
+        keyExtractor={(item) => item.id}
+        numColumns={2}
+        contentContainerStyle={styles.seatsContainer}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            testID={`seat_${item.id}`}
+            style={[styles.seat, item.isReserved && styles.reserved]}
+            onPress={() => handleReserve(item)}
+          >
+            <QRCode value={item.qrData} size={100} />
+            <Text style={styles.seatText}>{item.id}</Text>
+            <Text
+              style={[
+                styles.statusText,
+                item.isReserved ? styles.reservedText : styles.availableText,
+              ]}
             >
-              <QRCode value={item.qrData} size={100} />
-              <Text style={styles.seatText}>{item.id}</Text>
-              <Text
-                style={[
-                  styles.statusText,
-                  item.isReserved ? styles.reservedText : styles.availableText,
-                ]}
-              >
-                {item.isReserved ? "Zajęte" : "Dostępne"}
-              </Text>
-            </TouchableOpacity>
-          )}
-        />
-      )}
+              {item.isReserved ? "Zajęte" : "Dostępne"}
+            </Text>
+          </TouchableOpacity>
+        )}
+      />
     </View>
   );
 };
@@ -295,15 +323,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#f0f0f0",
-  },
-  noSeatsContainer: {
-    alignItems: "center",
-    marginTop: 50,
-  },
-  noSeatsText: {
-    fontSize: 18,
-    color: "#333",
-    marginVertical: 10,
   },
   refreshButton: {
     backgroundColor: "#6A0DAD",

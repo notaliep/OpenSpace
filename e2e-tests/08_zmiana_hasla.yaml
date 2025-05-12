@@ -1,0 +1,28 @@
+appId: com.s23884.OpenSpace
+
+name: Zmiana hasła użytkownika
+---
+- launchApp
+
+# Logowanie
+- tapOn: "Wpisz email"
+- inputText: "test1@gmail.com"
+- tapOn: "Wpisz hasło"
+- inputText: "test1@gmail.com"
+- tapOn:
+    text: ".*Zaloguj.*"
+- assertVisible: "Witaj w OpenSpace!"
+
+# Kliknięcie tekstu „Mój profil” (ukryty przycisk z tekstem)
+- tapOn: "Mój profil"
+- assertVisible: "Profil użytkownika"
+
+# Zmiana hasła
+- tapOn:
+    id: passwordInput
+- inputText: "NoweHaslo123"
+- tapOn:
+    id: updatePassword
+
+# Sprawdzenie, że użytkownik został wylogowany
+- assertVisible: "Logowanie"

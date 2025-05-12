@@ -9,21 +9,24 @@ import {
   TouchableOpacity,
   StatusBar,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../config/firebase";
+
 const backImage = require("../assets/backImage.png");
 
 export default function Login({ navigation }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const onHandleLogin = () => {
-    setErrorMessage(""); // Resetujemy komunikat błędu
+    setErrorMessage("");
     if (email !== "" && password !== "") {
       signInWithEmailAndPassword(auth, email, password)
         .then(() => console.log("Login success"))
-        .catch((err) =>
+        .catch(() =>
           setErrorMessage("Niepoprawny email lub hasło. Spróbuj ponownie.")
         );
     } else {
@@ -40,48 +43,60 @@ export default function Login({ navigation }) {
         <TextInput
           style={styles.input}
           placeholder="Wpisz email"
+          accessibilityLabel="loginEmail"
           autoCapitalize="none"
           keyboardType="email-address"
           textContentType="emailAddress"
-          autoFocus={true}
+          autoFocus
           value={email}
-          onChangeText={(text) => setEmail(text)}
+          onChangeText={setEmail}
         />
-        <TextInput
-          style={styles.input}
-          placeholder="Wpisz hasło"
-          autoCapitalize="none"
-          autoCorrect={false}
-          secureTextEntry={true}
-          textContentType="password"
-          value={password}
-          onChangeText={(text) => setPassword(text)}
-        />
+        <View style={{ position: "relative" }}>
+          <TextInput
+            style={styles.input}
+            placeholder="Wpisz hasło"
+            accessibilityLabel="loginPassword"
+            autoCapitalize="none"
+            autoCorrect={false}
+            secureTextEntry={!showPassword}
+            textContentType="password"
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TouchableOpacity
+            style={{ position: "absolute", right: 16, top: 16 }}
+            onPress={() => setShowPassword(!showPassword)}
+            accessibilityLabel="togglePasswordVisibility"
+          >
+            <Ionicons
+              name={showPassword ? "eye-off" : "eye"}
+              size={24}
+              color="gray"
+            />
+          </TouchableOpacity>
+        </View>
+
         {errorMessage ? (
           <Text style={styles.errorText}>{errorMessage}</Text>
         ) : null}
-        <TouchableOpacity style={styles.button} onPress={onHandleLogin}>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={onHandleLogin}
+          accessibilityLabel="loginButton"
+        >
           <Text style={{ fontWeight: "bold", color: "#fff", fontSize: 18 }}>
-            {" "}
             Zaloguj
           </Text>
         </TouchableOpacity>
-        <View
-          style={{
-            marginTop: 20,
-            flexDirection: "row",
-            alignItems: "center",
-            alignSelf: "center",
-          }}
-        >
-          <Text style={{ color: "gray", fontWeight: "600", fontSize: 14 }}>
-            Nie masz konta?{" "}
-          </Text>
-          <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-            <Text style={{ color: "#633a8a", fontWeight: "600", fontSize: 14 }}>
-              {" "}
-              Zarejestruj się
-            </Text>
+
+        <View style={styles.linkContainer}>
+          <Text style={styles.linkText}>Nie masz konta?</Text>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Signup")}
+            accessibilityLabel="goToSignup"
+          >
+            <Text style={styles.linkAction}> Zarejestruj się</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -89,11 +104,9 @@ export default function Login({ navigation }) {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
+  container: { flex: 1, backgroundColor: "#fff" },
   title: {
     fontSize: 36,
     fontWeight: "bold",
@@ -108,6 +121,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     borderRadius: 10,
     padding: 12,
+    paddingRight: 44,
   },
   errorText: {
     color: "red",
@@ -148,5 +162,21 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginTop: 40,
+  },
+  linkContainer: {
+    marginTop: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "center",
+  },
+  linkText: {
+    color: "gray",
+    fontWeight: "600",
+    fontSize: 14,
+  },
+  linkAction: {
+    color: "#633a8a",
+    fontWeight: "600",
+    fontSize: 14,
   },
 });

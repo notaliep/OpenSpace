@@ -99,10 +99,15 @@ export default function ChatScreen() {
         <TextInput
           style={styles.input}
           placeholder="Napisz wiadomość..."
+          testID="inputMessage"
           value={inputText}
           onChangeText={setInputText}
         />
-        <TouchableOpacity onPress={onSend} style={styles.sendButton}>
+        <TouchableOpacity
+          onPress={onSend}
+          style={styles.sendButton}
+          testID="sendMessageButton"
+        >
           <AntDesign name="arrowup" size={24} color="white" />
         </TouchableOpacity>
       </View>

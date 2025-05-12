@@ -38,34 +38,38 @@ const Scanner = () => {
   }, [permission, navigation]);
 
   const handleBarCodeScanned = async ({ type, data }) => {
-    if (!scanned) {
-      setScanned(true);
-      setScannedData(data);
-      setLoading(true);
-      setErrorMessage("");
-      setSeatInfo(null);
+    if (scanned) return;
 
-      console.log(`🔍 Zeskanowano kod QR: ${data}`);
+    setScanned(true);
+    setScannedData(data);
+    setLoading(true);
+    setErrorMessage("");
+    setSeatInfo(null);
 
+    console.log(`🔍 Zeskanowano kod QR: ${data}`);
+
+    try {
       const qrRef = doc(db, "qrcodes", data);
       const qrSnap = await getDoc(qrRef);
 
       if (qrSnap.exists()) {
         console.log("✅ Kod QR znajduje się w bazie!");
-
         const seatData = qrSnap.data();
         setSeatInfo(seatData);
-
-        Alert.alert("Kod QR poprawny!", `Rezerwujesz: ${seatData.seatId}`);
-        navigation.navigate("Form", { qrData: data });
+        setErrorMessage("");
       } else {
         console.log("❌ Kod QR nie znajduje się w bazie!");
         setErrorMessage(
-          "❌ Kod QR nie jest przypisany do żadnego miejsca. Spróbuj zeskanować ponownie."
+          "❌ Kod QR nie jest przypisany do żadnego miejsca. Spróbuj ponownie."
         );
         setScanned(false);
         setScannedData(null);
       }
+    } catch (error) {
+      console.error("❌ Błąd podczas sprawdzania kodu QR:", error);
+      setErrorMessage("Wystąpił błąd. Spróbuj ponownie.");
+      setScanned(false);
+    } finally {
       setLoading(false);
     }
   };
@@ -116,12 +120,18 @@ const Scanner = () => {
         seatInfo && (
           <View style={styles.overlay}>
             <Text style={styles.scannedText}>
-              ✅ Kod QR poprawny! Rezerwujesz: {seatInfo.seatId}
+              ✅ Kod QR poprawny! Rezerwujesz: {scannedData}
             </Text>
             <TouchableOpacity
               style={styles.button}
               onPress={() =>
-                navigation.navigate("Form", { qrData: scannedData })
+                navigation.navigate("Form", {
+                  qrData: scannedData,
+                  seatId: scannedData, // ← używamy samego kodu QR jako seatId
+                  date: new Date().toISOString().split("T")[0],
+                  startTime: new Date().toISOString(),
+                  endTime: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+                })
               }
             >
               <Text style={styles.buttonText}>Zarezerwuj</Text>

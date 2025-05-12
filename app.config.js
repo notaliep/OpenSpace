@@ -28,7 +28,7 @@ export default {
     web: {
       favicon: "./assets/favicon.png",
     },
-    plugins: ["expo-barcode-scanner"], // Dodane tutaj
+    plugins: ["expo-barcode-scanner"],
     extra: {
       apiKey: process.env.API_KEY,
       authDomain: process.env.AUTH_DOMAIN,
@@ -36,6 +36,11 @@ export default {
       storageBucket: process.env.STORAGE_BUCKET,
       messagingSenderId: process.env.MESSAGING_SENDER_ID,
       appId: process.env.APP_ID,
+
+      // 👇 DODAJ TO:
+      eas: {
+        projectId: "92fe0942-88e5-42c1-bbbb-a523f11d1323",
+      },
     },
   },
 };

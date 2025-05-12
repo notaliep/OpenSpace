@@ -1,0 +1,24 @@
+appId: com.s23884.OpenSpace
+
+name: Rezerwacja miejsca seat-1
+---
+- launchApp
+- assertVisible: "Logowanie"
+- tapOn: "Wpisz email"
+- inputText: "test1@gmail.com"
+- tapOn: "Wpisz hasło"
+- inputText: "test1@gmail.com"
+- tapOn:
+    text: ".*Zaloguj.*"
+- assertVisible: "Witaj w OpenSpace!"
+
+# Przejście do ekranu graficznej rezerwacji
+- tapOn: "📌 ZAREZERWUJ MIEJSCE"
+- assertVisible: "Zarezerwuj miejsce"
+
+# Kliknięcie w miejsce seat-1 (musisz mieć testID="seat_seat-1")
+- tapOn:
+    id: seat_seat-1
+
+# Sprawdzenie, czy wyświetlił się formularz
+- assertVisible: "Formularz rezerwacji"

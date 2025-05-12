@@ -1,0 +1,20 @@
+appId: com.s23884.OpenSpace
+
+name: Kliknięcie zmiany zdjęcia profilowego
+---
+- launchApp
+- tapOn: "Wpisz email"
+- inputText: "test1@gmail.com"
+- tapOn: "Wpisz hasło"
+- inputText: "test1@gmail.com"
+- tapOn:
+    text: ".*Zaloguj.*"
+- assertVisible: "Witaj w OpenSpace!"
+
+# Kliknięcie tekstu „Mój profil”
+- tapOn: "Mój profil"
+- assertVisible: "Profil użytkownika"
+
+# Kliknięcie zdjęcia profilowego
+- tapOn:
+    id: changeProfileImage

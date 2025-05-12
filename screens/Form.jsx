@@ -22,12 +22,24 @@ import { app } from "../config/firebase";
 const db = getFirestore(app);
 
 const Form = ({ route, navigation }) => {
-  const { qrData, seatId, date } = route.params || {};
+  const {
+    qrData,
+    seatId,
+    date,
+    startTime: initialStartTime,
+    endTime: initialEndTime,
+  } = route.params || {};
+
   const [name, setName] = useState("");
-  const [startTime, setStartTime] = useState(new Date());
-  const [endTime, setEndTime] = useState(
-    new Date(startTime.getTime() + 60 * 60 * 1000)
+  const [startTime, setStartTime] = useState(() =>
+    initialStartTime ? new Date(initialStartTime) : new Date()
   );
+  const [endTime, setEndTime] = useState(() =>
+    initialEndTime
+      ? new Date(initialEndTime)
+      : new Date(new Date().getTime() + 60 * 60 * 1000)
+  );
+
   const [showStartTimePicker, setShowStartTimePicker] = useState(false);
   const [showEndTimePicker, setShowEndTimePicker] = useState(false);
 
@@ -44,15 +56,17 @@ const Form = ({ route, navigation }) => {
     });
   }, [navigation]);
 
-  if (!qrData || !seatId || !date) {
-    Alert.alert("Błąd", "Brak wymaganych danych! Spróbuj ponownie.");
-    navigation.goBack();
-    return null;
-  }
+  useEffect(() => {
+    if (!qrData || !seatId || !date) {
+      Alert.alert("Błąd", "Brak wymaganych danych! Spróbuj ponownie.");
+      navigation.goBack();
+    } else if (!user) {
+      Alert.alert("Błąd", "Musisz być zalogowany, aby zarezerwować miejsce.");
+      navigation.goBack();
+    }
+  }, [qrData, seatId, date, user, navigation]);
 
-  if (!user) {
-    Alert.alert("Błąd", "Musisz być zalogowany, aby zarezerwować miejsce.");
-    navigation.goBack();
+  if (!qrData || !seatId || !date || !user) {
     return null;
   }
 
@@ -81,38 +95,21 @@ const Form = ({ route, navigation }) => {
   };
 
   const checkAvailability = async () => {
-    try {
-      const startISO = startTime.toISOString();
-      const endISO = endTime.toISOString();
+    const reservationsQuery = query(
+      collection(db, "reservations"),
+      where("seatId", "==", seatId),
+      where("date", "==", date),
+      where("startTime", "<", endTime.toISOString()),
+      where("endTime", ">", startTime.toISOString())
+    );
 
-      const reservationsQuery = query(
-        collection(db, "reservations"),
-        where("seatId", "==", seatId),
-        where("date", "==", date),
-        where("startTime", "<", endISO),
-        where("endTime", ">", startISO)
-      );
-
-      const snapshot = await getDocs(reservationsQuery);
-
-      console.log(`📋 Rezerwacje znalezione: ${snapshot.size}`);
-      snapshot.forEach((doc) => console.log("➡️", doc.data()));
-
-      return snapshot.empty;
-    } catch (error) {
-      console.error("❌ Błąd podczas sprawdzania dostępności:", error);
-      return true;
-    }
+    const snapshot = await getDocs(reservationsQuery);
+    return snapshot.empty;
   };
 
   const handleSubmit = async () => {
     if (!name.trim()) {
       Alert.alert("Błąd", "Musisz podać imię!");
-      return;
-    }
-
-    if (!(startTime instanceof Date) || !(endTime instanceof Date) || !date) {
-      Alert.alert("Błąd", "Niepoprawne dane czasu lub daty.");
       return;
     }
 
@@ -142,13 +139,9 @@ const Form = ({ route, navigation }) => {
       };
 
       await addDoc(collection(db, "reservations"), reservationData);
-
-      console.log("✅ Rezerwacja dodana:", reservationData);
-
       Alert.alert("Sukces", "Rezerwacja została pomyślnie dodana!");
       navigation.goBack();
     } catch (error) {
-      console.error("❌ Błąd przy zapisywaniu rezerwacji: ", error);
       Alert.alert("Błąd", `Wystąpił błąd: ${error.message}`);
     }
   };
@@ -156,22 +149,21 @@ const Form = ({ route, navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Formularz rezerwacji</Text>
-
       <TextInput
         style={styles.input}
         placeholder="Imię"
         placeholderTextColor="#999"
         value={name}
         onChangeText={setName}
+        accessibilityLabel="nameInput"
       />
-
       <TouchableOpacity
         style={styles.timePicker}
         onPress={() => setShowStartTimePicker(true)}
       >
-        <Text style={styles.timeText}>
+        <Text>
           ⏰ Start:{" "}
-          {startTime.toLocaleTimeString("pl-PL", {
+          {startTime.toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
           })}
@@ -181,18 +173,16 @@ const Form = ({ route, navigation }) => {
         <DateTimePicker
           value={startTime}
           mode="time"
-          display="default"
           onChange={handleStartTimeChange}
         />
       )}
-
       <TouchableOpacity
         style={styles.timePicker}
         onPress={() => setShowEndTimePicker(true)}
       >
-        <Text style={styles.timeText}>
+        <Text>
           ⏳ Koniec:{" "}
-          {endTime.toLocaleTimeString("pl-PL", {
+          {endTime.toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
           })}
@@ -202,19 +192,15 @@ const Form = ({ route, navigation }) => {
         <DateTimePicker
           value={endTime}
           mode="time"
-          display="default"
           onChange={handleEndTimeChange}
         />
       )}
-
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
         <Text style={styles.buttonText}>✅ ZAREZERWUJ</Text>
       </TouchableOpacity>
     </View>
   );
 };
-
-export default Form;
 
 const styles = StyleSheet.create({
   container: {
@@ -267,3 +253,5 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
+
+export default Form;

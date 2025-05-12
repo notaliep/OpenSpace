@@ -1,0 +1,12 @@
+appId: com.s23884.OpenSpace
+
+name: Bledne logowanie
+---
+- launchApp
+- tapOn: "Wpisz email"
+- inputText: "zlymail@gmail.com"
+- tapOn: "Wpisz hasło"
+- inputText: "zlehaslo"
+- tapOn:
+    text: ".*Zaloguj.*"
+- assertVisible: "Niepoprawny email lub hasło. Spróbuj ponownie."

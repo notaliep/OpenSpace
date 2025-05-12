@@ -1,0 +1,29 @@
+appId: com.s23884.OpenSpace
+
+name: Wysyłanie wiadomości w czacie
+---
+- launchApp
+
+# Ekran logowania
+- tapOn: "Wpisz email"
+- inputText: "test1@gmail.com"
+- tapOn: "Wpisz hasło"
+- inputText: "test1@gmail.com"
+- tapOn:
+    text: ".*Zaloguj.*"
+- assertVisible: "Witaj w OpenSpace!"
+
+# Przejście do czatu
+- tapOn:
+    id: chatButton
+- assertVisible: "Napisz wiadomość..."
+
+# Wysłanie wiadomości
+- tapOn:
+    id: inputMessage
+- inputText: "Test z Maestro"
+- tapOn:
+    id: sendMessageButton
+
+# Sprawdzenie, czy wiadomość się pojawiła
+- assertVisible: "Test z Maestro"

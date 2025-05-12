@@ -1,0 +1,13 @@
+appId: com.s23884.OpenSpace
+
+name: Logowanie uzytkownika
+---
+- launchApp
+- assertVisible: "Logowanie"
+- tapOn: "Wpisz email"
+- inputText: "test1@gmail.com"
+- tapOn: "Wpisz hasło"
+- inputText: "test1@gmail.com"
+- tapOn:
+    text: ".*Zaloguj.*"
+- assertVisible: "Witaj w OpenSpace!"

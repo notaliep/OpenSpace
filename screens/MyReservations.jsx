@@ -102,7 +102,7 @@ const MyReservations = () => {
       <FlatList
         data={reservations}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => {
+        renderItem={({ item, index }) => {
           const now = new Date();
           const start = new Date(item.startTime);
           const end = new Date(item.endTime);
@@ -122,6 +122,9 @@ const MyReservations = () => {
             <TouchableOpacity
               style={[styles.card, { backgroundColor: statusColor }]}
               onPress={() => handleReservationPress(item)}
+              accessibilityLabel={
+                index === 0 ? "firstReservationCard" : undefined
+              }
             >
               <Text style={styles.statusLabel}>{status}</Text>
               <Text style={styles.seatText}>📌 Miejsce: {item.seatId}</Text>
