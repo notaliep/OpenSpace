@@ -74,7 +74,7 @@ const Home = () => {
       <TouchableOpacity
         onPress={() => navigation.navigate("Chat")}
         testID="chatButton"
-        style={styles.invisibleButton}
+        style={[styles.invisibleButton, { top: 10, left: 10 }]}
       >
         <Text style={styles.invisibleText}>Czat</Text>
       </TouchableOpacity>
@@ -83,7 +83,7 @@ const Home = () => {
       <TouchableOpacity
         onPress={() => navigation.navigate("UserProfile")}
         testID="profileButton"
-        style={styles.invisibleButton}
+        style={[styles.invisibleButton, { top: 10, right: 10 }]}
       >
         <Text style={styles.invisibleText}>Mój profil</Text>
       </TouchableOpacity>
@@ -151,10 +151,8 @@ const styles = StyleSheet.create({
   },
   invisibleButton: {
     position: "absolute",
-    width: 1,
-    height: 1,
-    bottom: 0,
-    left: 0,
+    width: 10,
+    height: 10,
     opacity: 0.01,
   },
   invisibleText: {
